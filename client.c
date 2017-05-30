@@ -3,32 +3,7 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include<stdlib.h>
-#include<time.h>
-// funkcja pobierajaca czas systemowy
-char* time_send(){
-
-  time_t tmt = time(NULL);
-  struct tm tm = *localtime(&tmt);
-  int hour = tm.tm_hour;
-  int min = tm.tm_min;
-  int sec = tm.tm_sec;
-
-  char hour_c[15];
-  char min_c[15];
-  char sec_c[15];
-  sprintf(hour_c, "%d", hour);
-  sprintf(min_c, "%d", min);
-  sprintf(sec_c, "%d", sec);
-  char time_all[80];
-  strcpy(time_all, hour_c);
-  strcat(time_all, ":");
-  strcat(time_all, min_c);
-  strcat(time_all, ":");
-  strcat(time_all, sec_c);
-  char *recv_time = malloc(80);
-  strcpy(recv_time, time_all);
-  return recv_time;
-}
+#include"m_time.h"
 
 int main(int argc , char *argv[])
 {
@@ -39,7 +14,6 @@ int main(int argc , char *argv[])
     printf("Podaj swój nick: ");
     scanf("%s", nick);
     printf("%s", nick);
-    //char *message_send = malloc(sizeof(char) * 1200);
     char message_send[2000];
     char *port =malloc(sizeof(char) *16);
     //Create socket
@@ -98,23 +72,27 @@ int main(int argc , char *argv[])
 
         printf("napisz wiadomość: ");
         scanf("%s" , message);
-
         //wysylanie sformatowanych danych
-        strcpy(message_send, nick);
+        char* t;
+        t = time_send();
+        /*strcpy(message_send, nick);
         strcat(message_send, ",");
-        strcat(message_send, time_send());
+        strcat(message_send, t);
         strcat(message_send, ",");
-        strcat(message_send,message);
+        strcat(message_send,message);*/
+        sprintf(message_send, "%s, %s, %s", nick, t, message );
         if( send(sock , message_send , strlen(message_send)+1 , 0) < 0)
         {
             puts("Send failed");
             return 1;
         }
         fflush(stdout);
+        free(t);
+
     }
     //zamykanie socketu, sprzatanie
     close(sock);
-    free(port);
     free(message_send);
+    free(port);
     return 0;
 }
